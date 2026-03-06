@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from ItemCard import ItemCard
+import json
 
 class BaseSerializer(ABC):
     @abstractmethod
@@ -48,3 +49,35 @@ class TextParser(FileInfo, BaseDeserializer):
 class JSONParser(FileInfo, BaseDeserializer):
 
     __format_of_file = '.json'
+
+    def serialize_list
+
+    def serialize_object(self, item_card: ItemCard) -> None:
+
+        data_list = self.deserialize_list()
+        new_data_list = list()
+
+        if item_card not in data_list:
+            data_list.append(product)
+        else:
+            for data in data_list:
+                if data.get_id() == item_card.get_id():
+                    new_data_list.append(item_card)
+                else:
+                    new_data_list.append(data)
+
+        self.serialize_list(new_data_list)
+
+
+    def deserialize_list(self, ids: list[str] = None) -> list[ItemCard]:
+        item_cards = []
+
+        with open(self.get_full_file_name(), 'r') as fos:
+            data_dict = json.load(fos)
+
+        if ids:
+            for current_id in ids:
+                item_card = ItemCard()
+                item_card.set_from_dict(data_dict[current_id])
+
+                item_cards.append(item_card)
