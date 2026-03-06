@@ -24,9 +24,13 @@ class FileInfo:
     def set_file_name(self, filename):
         self.__filename = filename
     
-    def get_format_of_file:
+    def set_format_of_file(self, format_of_file):
+        self.__format_of_file = format_of_file
+
+    def get_format_of_file(self):
+
+        return self.__format_of_file
     
-    def set_format_of_file:
     
 
 class TextParser(FileInfo, BaseDeserializer):
@@ -81,3 +85,12 @@ class JSONParser(FileInfo, BaseDeserializer):
                 item_card.set_from_dict(data_dict[current_id])
 
                 item_cards.append(item_card)
+        else:
+            for data in data_dict:
+                item_card = ItemCard()
+                item_card.set_from_dict(data)
+
+                item_cards.append(item_card)
+
+        return item_cards
+        

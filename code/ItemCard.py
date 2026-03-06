@@ -211,3 +211,9 @@ class ItemCard:
             f"Подкатегория: {self.__subcategory}\n"
             f"-----------------------"
         )
+    
+    def from_str(self, line: str) -> None:
+        elements = line.strip(':')
+
+        self.set_article_number(elements[1])
+        self.set_name(elements[0])
