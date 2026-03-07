@@ -1,9 +1,22 @@
-from ItemCard import ItemCard
+"""
+Главный модуль программы.
+
+Создаёт карточку товара, сохраняет её в JSON файл,
+а затем читает список товаров из файла и выводит их на экран.
+"""
+
+from ItemCard import ItemCard, run_ui
 from Parsers import JSONParser
 
 
 def main():
-    
+    """
+    Точка входа программы.
+
+    Создаёт объект ItemCard, сохраняет его в JSON файл
+    и выводит все товары из файла.
+    """
+
     item = ItemCard(
         article_number=1001,
         name="Ноутбук",
@@ -18,15 +31,16 @@ def main():
 
     print(item)
 
-    
     parser = JSONParser("products.json")
+
     parser.serialize_object(item)
 
     items = parser.deserialize_list()
 
-    for i in items:
-        print(i)
+    for product in items:
+        print(product)
 
 
 if __name__ == "__main__":
     main()
+    run_ui()

@@ -1,97 +1,152 @@
+"""
+Модуль сериализации и десериализации данных товаров.
+
+Содержит абстрактные классы для парсеров
+и реализации для TXT и JSON файлов.
+"""
+
 from abc import ABC, abstractmethod
 from ItemCard import ItemCard
 import json
+import os
+
 
 class BaseSerializer(ABC):
+    """
+    Абстрактный базовый класс для сериализации объектов.
+    """
+
     @abstractmethod
     def serialize_object(self, obj):
+        """Сохраняет объект в файл."""
         pass
+
 
 class BaseDeserializer(ABC):
+    """
+    Абстрактный базовый класс для десериализации объектов.
+    """
+
     @abstractmethod
-    def deserialize_object(self, obj):
+    def deserialize_object(self):
+        """Читает объект из файла."""
         pass
 
+
 class FileInfo:
-    __format_of_file = None
+    """
+    Класс для хранения информации о файле.
+    """
 
     def __init__(self, filename):
+        """
+        Args:
+            filename: имя файла
+        """
         self.__filename = filename
 
     def get_file_name(self):
+        """Возвращает имя файла."""
         return self.__filename
-    
+
     def set_file_name(self, filename):
+        """Устанавливает новое имя файла."""
         self.__filename = filename
-    
-    def set_format_of_file(self, format_of_file):
-        self.__format_of_file = format_of_file
 
-    def get_format_of_file(self):
-
-        return self.__format_of_file
-    
-    
 
 class TextParser(FileInfo, BaseDeserializer):
-
-    __format_of_file = '.txt'
+    """
+    Парсер текстового файла (.txt).
+    """
 
     def deserialize_object(self):
+        """
+        Читает товары из текстового файла.
+
+        Returns:
+            list[ItemCard]: список товаров
+        """
+
         products = []
 
-        with open (self.__filename, 'r', encoding='utf-8') as fos:
+        with open(self.get_file_name(), 'r', encoding='utf-8') as fos:
             lines = fos.readlines()
-            lines = lines.remove(0)
 
         for line in lines:
-            product = ItemCard().set_from_str(line.strip())
+            item = ItemCard(0, "", 0, "", "", "", 1.0, "", "")
+            item.set_from_str(line.strip())
 
-            products.append(product)
+            products.append(item)
 
-
-class JSONParser(FileInfo, BaseDeserializer):
-
-    __format_of_file = '.json'
-
-    def serialize_list():
+        return products
 
 
-    def serialize_object(self, item_card: ItemCard) -> None:
+class JSONParser(FileInfo, BaseSerializer):
+    """
+    Парсер JSON файлов для хранения карточек товаров.
+    """
 
-        data_list = self.deserialize_list()
-        new_data_list = list()
+    def serialize_list(self, item_cards):
+        """
+        Сохраняет список товаров в JSON файл.
 
-        if item_card not in data_list:
-            data_list.append(product)
-        else:
-            for data in data_list:
-                if data.get_id() == item_card.get_id():
-                    new_data_list.append(item_card)
-                else:
-                    new_data_list.append(data)
+        Args:
+            item_cards: список объектов ItemCard
+        """
 
-        self.serialize_list(new_data_list)
+        data = [item.to_dict() for item in item_cards]
 
+        with open(self.get_file_name(), "w", encoding="utf-8") as fos:
+            json.dump(data, fos, indent=4, ensure_ascii=False)
 
-    def deserialize_list(self, ids: list[str] = None) -> list[ItemCard]:
+    def serialize_object(self, item_card: ItemCard):
+        """
+        Сохраняет один объект товара в JSON файл.
+
+        Если товар с таким артикулом уже существует —
+        он будет обновлён.
+
+        Args:
+            item_card: объект ItemCard
+        """
+
+        data_list = []
+
+        if os.path.exists(self.get_file_name()):
+            data_list = self.deserialize_list()
+
+        found = False
+
+        for i, item in enumerate(data_list):
+            if item.get_article_number() == item_card.get_article_number():
+                data_list[i] = item_card
+                found = True
+
+        if not found:
+            data_list.append(item_card)
+
+        self.serialize_list(data_list)
+
+    def deserialize_list(self):
+        """
+        Читает список товаров из JSON файла.
+
+        Returns:
+            list[ItemCard]: список карточек товаров
+        """
+
         item_cards = []
 
-        with open(self.get_full_file_name(), 'r') as fos:
-            data_dict = json.load(fos)
+        if not os.path.exists(self.get_file_name()):
+            return item_cards
 
-        if ids:
-            for current_id in ids:
-                item_card = ItemCard()
-                item_card.set_from_dict(data_dict[current_id])
+        with open(self.get_file_name(), 'r', encoding='utf-8') as fos:
+            data_list = json.load(fos)
 
-                item_cards.append(item_card)
-        else:
-            for data in data_dict:
-                item_card = ItemCard()
-                item_card.set_from_dict(data)
+        for data in data_list:
+            item = ItemCard(0, "", 0, "", "", "", 1.0, "", "")
+            item.set_from_dict(data)
 
-                item_cards.append(item_card)
+            item_cards.append(item)
 
         return item_cards
-    
