@@ -212,8 +212,40 @@ class ItemCard:
             f"-----------------------"
         )
     
-    def from_str(self, line: str) -> None:
-        elements = line.strip(':')
+    def set_from_str(self, line: str) -> None:
+        elements = line.strip().split(":")
 
-        self.set_article_number(elements[1])
         self.set_name(elements[0])
+        self.set_article_number(int(elements[1]))
+        self.set_quantity(int(elements[2]))
+        self.set_price(float(elements[3]))
+
+    def set_from_dict(self, data: dict):
+        """Заполняет объект из словаря."""
+
+        self.__article_number = data["article_number"]
+        self.__name = data["name"]
+        self.__quantity = data["quantity"]
+        self.__location = data["location"]
+        self.__supplier = data["supplier"]
+        self.__manufacturer = data["manufacturer"]
+        self.__price = data["price"]
+        self.__category = data["category"]
+        self.__subcategory = data["subcategory"]
+        self.__status = data["status"]
+
+    def to_dict(self) -> dict:
+        """Преобразует объект в словарь."""
+
+        return {
+            "article_number": self.__article_number,
+            "name": self.__name,
+            "quantity": self.__quantity,
+            "location": self.__location,
+            "supplier": self.__supplier,
+            "manufacturer": self.__manufacturer,
+            "price": self.__price,
+            "category": self.__category,
+            "subcategory": self.__subcategory,
+            "status": self.__status
+        }

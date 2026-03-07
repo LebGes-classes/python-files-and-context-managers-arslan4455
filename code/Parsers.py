@@ -45,7 +45,7 @@ class TextParser(FileInfo, BaseDeserializer):
             lines = lines.remove(0)
 
         for line in lines:
-            product = Product().set_from_str(line.strip())
+            product = ItemCard().set_from_str(line.strip())
 
             products.append(product)
 
@@ -54,7 +54,8 @@ class JSONParser(FileInfo, BaseDeserializer):
 
     __format_of_file = '.json'
 
-    def serialize_list
+    def serialize_list():
+
 
     def serialize_object(self, item_card: ItemCard) -> None:
 
@@ -93,4 +94,4 @@ class JSONParser(FileInfo, BaseDeserializer):
                 item_cards.append(item_card)
 
         return item_cards
-        
+    
