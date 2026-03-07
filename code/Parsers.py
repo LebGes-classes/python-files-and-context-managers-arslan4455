@@ -150,3 +150,9 @@ class JSONParser(FileInfo, BaseSerializer):
             item_cards.append(item)
 
         return item_cards
+    def load_or_create(self) -> list:
+
+        try:
+            return self.deserialize_list()
+        except FileNotFoundError:
+            return []
