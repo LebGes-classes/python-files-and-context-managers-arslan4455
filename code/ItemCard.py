@@ -182,20 +182,29 @@ class ItemCard:
             f"-----------------------"
         )
 
-    def set_from_str(self, line: str):
+    def set_from_str(self, line: str) -> None:
         """
         Заполняет объект из строки.
 
         Формат строки:
-        name:article:quantity:price
+        article:name:quantity:location:supplier:manufacturer:price:category:subcategory:status
         """
 
-        elements = line.split(":")
+        elements = line.strip().split(":")
 
-        self.set_name(elements[0])
-        self.set_article_number(int(elements[1]))
+        if len(elements) != 10:
+            raise ValueError("Неверный формат строки.")
+
+        self.set_article_number(int(elements[0]))
+        self.set_name(elements[1])
         self.set_quantity(int(elements[2]))
-        self.set_price(float(elements[3]))
+        self.set_location(elements[3])
+        self.set_supplier(elements[4])
+        self.set_manufacturer(elements[5])
+        self.set_price(float(elements[6]))
+        self.set_category(elements[7])
+        self.set_subcategory(elements[8])
+        self.set_status(elements[9])
 
     def set_from_dict(self, data: dict):
         """
