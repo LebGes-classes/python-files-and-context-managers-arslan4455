@@ -1,0 +1,14 @@
+[
+    {
+        "article_number": 1001,
+        "name": "Ноутбук",
+        "quantity": 10,
+        "location": "Склад A",
+        "supplier": "ООО Поставщик",
+        "manufacturer": "Lenovo",
+        "price": 75000.0,
+        "category": "Техника",
+        "subcategory": "Ноутбуки",
+        "status": "в наличии"
+    }
+]

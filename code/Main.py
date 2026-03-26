@@ -1,7 +1,7 @@
 import json
 import os
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List
 
 class ProductCard:
     """
@@ -38,8 +38,6 @@ class ProductCard:
         return (f"#{self.index} | ID:{self.product_id} | {self.name} | "
                 f"{self.quantity}шт. | {self.price}р. | {self.city}")
 
-# --- Абстрактные интерфейсы ---
-
 class BaseSerializer(ABC):
     """Базовый интерфейс для сохранения данных."""
     @abstractmethod
@@ -49,8 +47,6 @@ class BaseDeserializer(ABC):
     """Базовый интерфейс для загрузки данных."""
     @abstractmethod
     def deserialize(self, filepath: str) -> List[ProductCard]: pass
-
-# --- Реализация JSON ---
 
 class JsonSerializer(BaseSerializer):
     """Класс для записи данных в JSON-формат."""
@@ -71,18 +67,25 @@ class JsonDeserializer(BaseDeserializer):
 # --- Реализация TXT ---
 
 class TxtDeserializer(BaseDeserializer):
-    """Класс для чтения из TXT с пропуском заголовка."""
     def deserialize(self, filepath: str) -> List[ProductCard]:
-        if not os.path.exists(filepath): return []
+        if not os.path.exists(filepath): 
+            print(f"Файл {filepath} не найден!")
+            return []
         products = []
         with open(filepath, 'r', encoding='utf-8') as f:
-            next(f, None)  # ПРОПУСК ПЕРВОЙ СТРОКИ (заголовка)
-            for line in f:
+            header = next(f, None)
+            print(f"Пропущена шапка: {header.strip() if header else 'пусто'}")
+            for line_no, line in enumerate(f, 2):
                 p = line.strip().split(';')
-                if len(p) == 10:
+                if len(p) != 10:
+                    print(f"Ошибка в строке {line_no}: Ожидалось 10 колонок, найдено {len(p)}")
+                    continue
+                try:
                     products.append(ProductCard(p[0], p[1], p[2], int(p[3]), 
-                                              p[4], p[5], p[6], float(p[7][:-5]), 
+                                              p[4], p[5], p[6], float(p[7][:-4]), 
                                               p[8], p[9]))
+                except ValueError as e:
+                    print(f"Ошибка типов в строке {line_no}: {e}")
         return products
 
 # --- Менеджер и Интерфейс ---
@@ -97,14 +100,25 @@ class CatalogManager:
         self.tx_des = TxtDeserializer()
         self.products: Dict[str, ProductCard] = self._initial_load()
 
-    def _initial_load(self):
+    def _initial_load(self) -> Dict[str, ProductCard]:
+        json_data = []
         if os.path.exists(self.json_file):
-            return {p.product_id: p for p in self.js_des.deserialize(self.json_file)}
-        elif os.path.exists(self.txt_file):
-            prods = self.tx_des.deserialize(self.txt_file)
-            self.js_ser.serialize(prods, self.json_file)
-            return {p.product_id: p for p in prods}
-        return {}
+            json_data = self.js_des.deserialize(self.json_file)
+        
+        # Если из JSON ничего не пришло (файла нет или он пустой [])
+        if not json_data:
+            print("Поиск данных в TXT...") # Отладочное сообщение
+            txt_data = self.tx_des.deserialize(self.txt_file)
+            if txt_data:
+                print(f"Загружено из TXT: {len(txt_data)} шт.")
+                # Сразу сохраняем в JSON, чтобы в следующий раз брать оттуда
+                self.js_ser.serialize(txt_data, self.json_file)
+                return {p.product_id: p for p in txt_data}
+            else:
+                print("TXT файл тоже пуст или не найден.")
+                return {}
+            
+        return {p.product_id: p for p in json_data}
 
     def _save(self):
         self.js_ser.serialize(list(self.products.values()), self.json_file)
@@ -172,5 +186,14 @@ class ConsoleUI:
         else: print("Не найден.")
 
 if __name__ == "__main__":
-    ui = ConsoleUI(CatalogManager())
+    if not os.path.exists('catalog.txt'):
+        with open('catalog.txt', 'w', encoding='utf-8') as f:
+            f.write("№;ID;Наименование;Количество;Состояние;Поставщик;Производитель;Стоимость;Местоположение;Город\n")
+            f.write("1;TEST_ID;Тестовый товар;5;Отличное;Поставщик;Завод;99.9;Полка 1;Питер\n")
+        print("Был создан тестовый catalog.txt, так как его не было.")
+
+    manager = CatalogManager()
+    print(f"Загружено товаров в память: {len(manager.products)}")
+    
+    ui = ConsoleUI(manager)
     ui.run()
