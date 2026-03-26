@@ -1,97 +1,49 @@
+import os, json
 from abc import ABC, abstractmethod
-from ItemCard import ItemCard
-import json
+from typing import List
+from ProductCard import ProductCard
 
 class BaseSerializer(ABC):
+    """Базовый интерфейс для сохранения данных."""
     @abstractmethod
-    def serialize_object(self, obj):
-        pass
+    def serialize(self, products: List[ProductCard], filepath: str): pass
 
 class BaseDeserializer(ABC):
+    """Базовый интерфейс для загрузки данных."""
     @abstractmethod
-    def deserialize_object(self, obj):
-        pass
+    def deserialize(self, filepath: str) -> List[ProductCard]: pass
 
-class FileInfo:
-    __format_of_file = None
+# --- Реализация JSON ---
 
-    def __init__(self, filename):
-        self.__filename = filename
+class JsonSerializer(BaseSerializer):
+    """Класс для записи данных в JSON-формат."""
+    def serialize(self, products: List[ProductCard], filepath: str):
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump([p.to_dict() for p in products], f, ensure_ascii=False, indent=4)
 
-    def get_file_name(self):
-        return self.__filename
-    
-    def set_file_name(self, filename):
-        self.__filename = filename
-    
-    def set_format_of_file(self, format_of_file):
-        self.__format_of_file = format_of_file
+class JsonDeserializer(BaseDeserializer):
+    """Класс для чтения данных из JSON-формата."""
+    def deserialize(self, filepath: str) -> List[ProductCard]:
+        if not os.path.exists(filepath): return []
+        with open(filepath, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+                return [ProductCard.from_dict(item) for item in data]
+            except: return []
 
-    def get_format_of_file(self):
+# --- Реализация TXT ---
 
-        return self.__format_of_file
-    
-    
-
-class TextParser(FileInfo, BaseDeserializer):
-
-    __format_of_file = '.txt'
-
-    def deserialize_object(self):
+class TxtDeserializer(BaseDeserializer):
+    """Класс для чтения из TXT с пропуском заголовка."""
+    def deserialize(self, filepath: str) -> List[ProductCard]:
+        if not os.path.exists(filepath): return []
         products = []
-
-        with open (self.__filename, 'r', encoding='utf-8') as fos:
-            lines = fos.readlines()
-            lines = lines.remove(0)
-
-        for line in lines:
-            product = ItemCard().set_from_str(line.strip())
-
-            products.append(product)
-
-
-class JSONParser(FileInfo, BaseDeserializer):
-
-    __format_of_file = '.json'
-
-    def serialize_list():
-
-
-    def serialize_object(self, item_card: ItemCard) -> None:
-
-        data_list = self.deserialize_list()
-        new_data_list = list()
-
-        if item_card not in data_list:
-            data_list.append(product)
-        else:
-            for data in data_list:
-                if data.get_id() == item_card.get_id():
-                    new_data_list.append(item_card)
-                else:
-                    new_data_list.append(data)
-
-        self.serialize_list(new_data_list)
-
-
-    def deserialize_list(self, ids: list[str] = None) -> list[ItemCard]:
-        item_cards = []
-
-        with open(self.get_full_file_name(), 'r') as fos:
-            data_dict = json.load(fos)
-
-        if ids:
-            for current_id in ids:
-                item_card = ItemCard()
-                item_card.set_from_dict(data_dict[current_id])
-
-                item_cards.append(item_card)
-        else:
-            for data in data_dict:
-                item_card = ItemCard()
-                item_card.set_from_dict(data)
-
-                item_cards.append(item_card)
-
-        return item_cards
-    
+        with open(filepath, 'r', encoding='utf-8') as f:
+            next(f, None)  # ПРОПУСК ПЕРВОЙ СТРОКИ (заголовка)
+            for line in f:
+                p = line.strip().split(';')
+                if len(p) == 10:
+                    products.append(ProductCard(p[0], p[1], p[2], int(p[3]), 
+                                              p[4], p[5], p[6], float(p[7]), 
+                                              p[8], p[9]))
+        return products
