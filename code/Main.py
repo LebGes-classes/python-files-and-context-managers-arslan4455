@@ -3,6 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
+
 class ProductCard:
     """
     Представляет расширенную карточку товара.
@@ -64,8 +65,6 @@ class JsonDeserializer(BaseDeserializer):
                 return [ProductCard.from_dict(item) for item in data]
             except: return []
 
-# --- Реализация TXT ---
-
 class TxtDeserializer(BaseDeserializer):
     def deserialize(self, filepath: str) -> List[ProductCard]:
         if not os.path.exists(filepath): 
@@ -88,8 +87,6 @@ class TxtDeserializer(BaseDeserializer):
                     print(f"Ошибка типов в строке {line_no}: {e}")
         return products
 
-# --- Менеджер и Интерфейс ---
-
 class CatalogManager:
     """Менеджер управления каталогом с синхронизацией в JSON."""
     def __init__(self, json_file='catalog.json', txt_file='catalog.txt'):
@@ -105,7 +102,7 @@ class CatalogManager:
         if os.path.exists(self.json_file):
             json_data = self.js_des.deserialize(self.json_file)
         
-        # Если из JSON ничего не пришло (файла нет или он пустой [])
+        
         if not json_data:
             print("Поиск данных в TXT...") # Отладочное сообщение
             txt_data = self.tx_des.deserialize(self.txt_file)
