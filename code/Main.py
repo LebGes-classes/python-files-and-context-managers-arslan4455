@@ -6,9 +6,9 @@ from typing import Dict, List
 
 class ProductCard:
     """
-    Представляет расширенную карточку товара.
+    Представляет карточку товара.
     
-    Атрибуты:
+    Attrs:
         index (str): Порядковый номер товара или внутренний индекс.
         product_id (str): Уникальный идентификатор товара (артикул).
         name (str): Наименование товара.
@@ -39,7 +39,7 @@ class ProductCard:
         """
         Сериализует объект карточки товара в словарь.
 
-        Возвращает:
+        Returns:
             dict: Словарь со всеми атрибутами товара.
         """
         return self.__dict__
@@ -49,17 +49,17 @@ class ProductCard:
         """
         Десериализует словарь в объект ProductCard.
 
-        Аргументы:
+        Args:
             data (dict): Словарь с данными о товаре.
 
-        Возвращает:
+        Returns:
             ProductCard: Экземпляр карточки товара.
         """
         return cls(**data)
 
     def __repr__(self) -> str:
         """
-        Возвращает строковое представление карточки товара для вывода в консоль.
+        Returns строковое представление карточки товара для вывода в консоль.
         """
         return (f"#{self.index} | ID:{self.product_id} | {self.name} | "
                 f"{self.quantity}шт. | {self.price}р. | {self.city}")
@@ -72,7 +72,7 @@ class BaseSerializer(ABC):
         """
         Сохраняет список товаров в файл.
 
-        Аргументы:
+        Args:
             products (List[ProductCard]): Список объектов товаров для сохранения.
             filepath (str): Путь к файлу для сохранения.
         """
@@ -86,10 +86,10 @@ class BaseDeserializer(ABC):
         """
         Загружает список товаров из файла.
 
-        Аргументы:
+        Args:
             filepath (str): Путь к файлу для чтения.
 
-        Возвращает:
+        Returns:
             List[ProductCard]: Список загруженных объектов товаров.
         """
         pass
@@ -101,7 +101,7 @@ class JsonSerializer(BaseSerializer):
         """
         Записывает список товаров в JSON-файл с отступами для читаемости.
 
-        Аргументы:
+        Args:
             products (List[ProductCard]): Список товаров.
             filepath (str): Путь к JSON-файлу.
         """
@@ -115,11 +115,11 @@ class JsonDeserializer(BaseDeserializer):
         """
         Читает товары из JSON-файла.
 
-        Аргументы:
+        Args:
             filepath (str): Путь к JSON-файлу.
 
-        Возвращает:
-            List[ProductCard]: Список товаров. Если файл не найден или поврежден, возвращает пустой список.
+        Returns:
+            List[ProductCard]: Список товаров. Если файл не найден или поврежден, Returns пустой список.
         """
         if not os.path.exists(filepath): return []
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -136,10 +136,10 @@ class TxtDeserializer(BaseDeserializer):
         """
         Читает товары из TXT-файла с учетом заголовков и разделителей.
 
-        Аргументы:
+        Args:
             filepath (str): Путь к TXT-файлу.
 
-        Возвращает:
+        Returns:
             List[ProductCard]: Список успешно загруженных товаров.
         """
         if not os.path.exists(filepath): 
@@ -173,7 +173,7 @@ class CatalogManager:
         """
         Инициализирует менеджер каталога.
 
-        Аргументы:
+        Args:
             json_file (str): Путь к основному JSON-файлу базы данных.
             txt_file (str): Путь к резервному/импортируемому TXT-файлу.
         """
@@ -189,7 +189,7 @@ class CatalogManager:
         Выполняет первичную загрузку данных. Сначала пытается загрузить из JSON,
         если он пуст или отсутствует — пытается импортировать из TXT.
 
-        Возвращает:
+        Returns:
             Dict[str, ProductCard]: Словарь товаров, где ключ — ID товара.
         """
         json_data = []
@@ -218,10 +218,10 @@ class CatalogManager:
         """
         Добавляет новый товар в каталог.
 
-        Аргументы:
+        Args:
             data (dict): Словарь с данными нового товара.
 
-        Возвращает:
+        Returns:
             bool: True, если товар успешно добавлен. False, если товар с таким ID уже существует.
         """
         if data['product_id'] in self.products: return False
@@ -231,13 +231,13 @@ class CatalogManager:
 
     def update(self, p_id: str, **kwargs) -> bool:
         """
-        Обновляет атрибуты существующего товара.
+        Обновляет Attrs существующего товара.
 
-        Аргументы:
+        Args:
             p_id (str): ID товара, который нужно обновить.
-            **kwargs: Произвольные именованные аргументы для обновления (например, price=100.0).
+            **kwargs: Произвольные именованные Args для обновления (например, price=100.0).
 
-        Возвращает:
+        Returns:
             bool: True, если товар найден и обновлен. False, если товар не найден.
         """
         if p_id not in self.products: return False
@@ -252,10 +252,10 @@ class CatalogManager:
         """
         Удаляет товар из каталога по его ID.
 
-        Аргументы:
+        Args:
             p_id (str): ID товара для удаления.
 
-        Возвращает:
+        Returns:
             bool: True, если товар был удален. False, если товар не найден.
         """
         if p_id in self.products:
@@ -271,7 +271,7 @@ class ConsoleUI:
         """
         Инициализирует интерфейс.
 
-        Аргументы:
+        Args:
             manager (CatalogManager): Экземпляр менеджера каталога для выполнения операций.
         """
         self.manager = manager
