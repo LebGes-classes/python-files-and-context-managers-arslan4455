@@ -197,11 +197,10 @@ class CatalogManager:
             json_data = self.js_des.deserialize(self.json_file)
         
         if not json_data:
-            print("Поиск данных в TXT...") # Отладочное сообщение
+            print("Поиск данных в TXT...")
             txt_data = self.tx_des.deserialize(self.txt_file)
             if txt_data:
                 print(f"Загружено из TXT: {len(txt_data)} шт.")
-                # Сразу сохраняем в JSON, чтобы в следующий раз брать оттуда
                 self.js_ser.serialize(txt_data, self.json_file)
                 return {p.product_id: p for p in txt_data}
             else:
